@@ -1,2 +1,1 @@
-# cag
-CAG : Context Awareness Gate
+# CAG : Context Awareness Gate
