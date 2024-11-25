@@ -1,14 +1,22 @@
 import jax.numpy as jnp
 from jax import jit
+from typing import List
+import jax
+from functools import cached_property
+
 class VectorCandidates:
-    def __init__(self, contexts, questions):
-        self.contexts = contexts
-        self.questions = questions
+    def __init__(self, contexts : List[List[float]],
+                 questions : List[List[List[float]]]):
+
+        self.contexts = jnp.array(contexts)
+        self.questions = jnp.array(questions)
 
 
     @staticmethod
     @jit  # Use JIT here to optimize the static method
-    def _calculate_similarities(contexts, questions):
+    def _calculate_similarities(contexts : jax.Array,
+                                questions : jax.Array) -> jax.Array :
+
         context_norms = jnp.linalg.norm(contexts, axis=2, keepdims=True)
         question_norms = jnp.linalg.norm(questions, axis=3, keepdims=True)
 
@@ -20,11 +28,12 @@ class VectorCandidates:
 
     @staticmethod
     @jit
-    def _calculate_query_sims(contexts, query):
+    def _calculate_query_sims(contexts : jax.Array,
+                              query : jax.Array) -> jax.Array:
 
         dot_products = jnp.sum(contexts * query, axis=-1)
-        query_norm = jnp.linalg.norm(query, axis=-1, keepdims=True)  # Shape (1, 1)
-        context_norms = jnp.linalg.norm(contexts, axis=-1)  # Shape (1, 100)
+        query_norm = jnp.linalg.norm(query, axis=-1, keepdims=True)
+        context_norms = jnp.linalg.norm(contexts, axis=-1)
         cosine_similarities = dot_products / (query_norm * context_norms)
 
         return cosine_similarities
@@ -33,6 +42,17 @@ class VectorCandidates:
     def query_similarities(self, query):
         return self._calculate_query_sims(self.contexts, query)
 
+    @cached_property
     def internal_similarities(self):
         return self._calculate_similarities(self.contexts, self.questions)
+
+    @classmethod
+    @jit
+    def _get_policy_output(similarities: jax.Array,
+                           percentiles: jax.Array) -> jax.Array:
+        return jnp.percentile(similarities, percentiles)
+
+    def get_policy_output(self,percentiles : jax.Array) -> jax.Array :
+
+        return self._get_policy_output(self.internal_similarities(), percentiles)
 
