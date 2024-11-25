@@ -2,11 +2,10 @@ import jax.numpy as jnp
 from jax import jit
 from typing import List
 import jax
-from functools import cached_property
 
 class VectorCandidates:
-    def __init__(self, contexts : List[List[float]],
-                 questions : List[List[List[float]]]):
+    def __init__(self, contexts,
+                 questions):
 
         self.contexts = jnp.array(contexts)
         self.questions = jnp.array(questions)
@@ -42,11 +41,10 @@ class VectorCandidates:
     def query_similarities(self, query):
         return self._calculate_query_sims(self.contexts, query)
 
-    @cached_property
     def internal_similarities(self):
         return self._calculate_similarities(self.contexts, self.questions)
 
-    @classmethod
+    @staticmethod
     @jit
     def _get_policy_output(similarities: jax.Array,
                            percentiles: jax.Array) -> jax.Array:
