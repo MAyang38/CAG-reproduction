@@ -7,12 +7,10 @@ import jax.numpy as jnp
 class VectorCandidatesGate:
 
     def __init__(self, vc : VectorCandidates,
-                 embedding_model,
-                 embeddings = None):
+                 embedding_model):
 
         self.vc = vc
         self.embedding_model = embedding_model
-        self.embeddings = embeddings
 
     def __call__(self, query : str, policy = 95, threshold = 0, return_aux = False):
 
