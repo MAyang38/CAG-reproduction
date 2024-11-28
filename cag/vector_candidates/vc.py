@@ -38,7 +38,8 @@ class VectorCandidates:
         return cosine_similarities
 
 
-    def query_similarities(self, query):
+    def query_similarities(self, query : jax.Array ) -> jax.Array :
+
         return self._calculate_query_sims(self.contexts, query)
 
     def internal_similarities(self):
