@@ -8,17 +8,13 @@ class VectorCandidatesGate:
 
     def __init__(self, vc : VectorCandidates,
                  embedding_model,
-                 embeddings = None,
-                 policy = 95 ,
-                 threshold = 0):
+                 embeddings = None):
 
         self.vc = vc
         self.embedding_model = embedding_model
         self.embeddings = embeddings
-        self.policy = policy
-        self.threshold = threshold
 
-    def __call__(self, query : str):
+    def __call__(self, query : str, policy = 95, threshold = 0, return_aux = False):
 
         query = self.embedding_model.embed_query(query)
         query = jnp.array(query)
@@ -27,12 +23,15 @@ class VectorCandidatesGate:
         # here we calculate d
         d = self.vc.query_similarities(query)
 
-        policy = jnp.array([100 - self.policy])
+        policy = jnp.array([100 - policy])
 
         policy_output = self.vc.get_policy_output(policy)
 
-        if d.max() >= policy_output - self.threshold:
-            return True
+        if d.max() >= policy_output - threshold:
+            if return_aux:
+                return {'policy': policy_output,
+                        'd' : d.max()}, True
 
         else:
-            return False
+            return {'policy': policy_output,
+                        'd' : d.max()}, False
