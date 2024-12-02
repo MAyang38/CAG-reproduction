@@ -4,8 +4,8 @@ from sentence_transformers import SentenceTransformer
 
 
 class SentenceTransformerEmbeddings(Embeddings):
-    def __init__(self, model):
-        self.model = SentenceTransformer(model, trust_remote_code=True)
+    def __init__(self, model, device : str = 'cpu'):
+        self.model = SentenceTransformer(model, trust_remote_code=True, device = device)
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
         return [self.model.encode(t).tolist() for t in texts]
