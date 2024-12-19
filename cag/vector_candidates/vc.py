@@ -17,7 +17,7 @@ class VectorCandidates:
                                 questions : jax.Array) -> jax.Array :
 
         context_norms = jnp.linalg.norm(contexts, axis=2, keepdims=True)
-        question_norms = jnp.linalg.norm(questions, axis=3, keepdims=True)
+        question_norms = jnp.linalg.norm(questions, axis=2, keepdims=True)
 
         dot_products = jnp.einsum('fij,fikj->fik', contexts, questions)
 
